@@ -1601,6 +1601,7 @@ WEBVIEW_API void webview_print_log(const char *s) { OutputDebugString(s); }
 #define NSWindowStyleMaskTitled 1
 #define NSWindowStyleMaskClosable 2
 #define NSWindowStyleMaskFullScreen (1 << 14)
+#define NSFullSizeContentViewWindowMask (1 << 15)
 #define NSViewWidthSizable 2
 #define NSViewHeightSizable 16
 #define NSBackingStoreBuffered 2
@@ -1866,11 +1867,16 @@ WEBVIEW_API int webview_init(struct webview *w) {
     style = style | NSWindowStyleMaskResizable;
   }
 
+  style |= NSFullSizeContentViewWindowMask;
+
   w->priv.window =
       objc_msgSend((id)objc_getClass("NSWindow"), sel_registerName("alloc"));
   objc_msgSend(w->priv.window,
                sel_registerName("initWithContentRect:styleMask:backing:defer:"),
                r, style, NSBackingStoreBuffered, 0);
+
+  objc_msgSend(w->priv.window, sel_registerName("setValue:forKey:"), 1, get_nsstring("titlebarAppearsTransparent"));
+  objc_msgSend(w->priv.window, sel_registerName("setValue:forKey:"), 1, get_nsstring("titleVisibility"));
 
   objc_msgSend(w->priv.window, sel_registerName("autorelease"));
   objc_msgSend(w->priv.window, sel_registerName("setTitle:"), nsTitle);
